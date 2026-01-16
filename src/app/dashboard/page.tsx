@@ -3,6 +3,7 @@ import { headers, cookies } from "next/headers";
 
 import { ReferralsList } from "@/components/referrals-list";
 import { SharePanel } from "@/components/share-panel";
+import { LogoutButton } from "@/components/logout-button";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
 import { loanNeedOptions } from "@/lib/validation";
@@ -46,16 +47,21 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
         <header className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500">
-            Seu cockpit
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-semibold text-slate-900">
-              Olá, {user.name.split(" ")[0]}
-            </h1>
-            <span className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
-              Código {user.referralCode}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.5em] text-slate-500">
+                Seu cockpit
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl font-semibold text-slate-900">
+                  Olá, {user.name.split(" ")[0]}
+                </h1>
+                <span className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+                  Código {user.referralCode}
+                </span>
+              </div>
+            </div>
+            <LogoutButton />
           </div>
           <p className="text-sm text-slate-500">
             Compartilhe o link, acompanhe as indicações e veja seu limite

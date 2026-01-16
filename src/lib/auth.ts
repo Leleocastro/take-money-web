@@ -37,3 +37,18 @@ export function setUserCodeCookie(
 
   return response;
 }
+
+export function clearUserCodeCookie(
+  response: NextResponse,
+  isProduction: boolean
+) {
+  response.cookies.set("userCode", "", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
+}

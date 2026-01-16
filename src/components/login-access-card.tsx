@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { LoginCodeVerification } from "@/components/login-code-verification";
@@ -108,6 +109,13 @@ export function LoginAccessCard() {
       <p className="mt-3 text-center text-xs text-slate-500">
         Não lembra o email? Faça um novo cadastro e atualize seus dados.
       </p>
+
+      <Link
+        href="/"
+        className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+      >
+        ← Voltar
+      </Link>
     </form>
   );
 }
