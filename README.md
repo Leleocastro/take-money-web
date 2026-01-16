@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Lead+ Créditos
 
-## Getting Started
+Aplicação full-stack em Next.js App Router para geração de leads de empréstimo com fluxo de cadastro, compartilhamento de link personalizado e painel para acompanhar indicações aprovadas.
 
-First, run the development server:
+### Principais recursos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Formulário responsivo** com validação via `react-hook-form` + `zod` e campos para nome, telefone, local de trabalho, salário e necessidade de crédito.
+- **API Routes + Prisma** para persistir usuários, gerar códigos de indicação únicos e associar quem indicou quem.
+- **Login por código no email**: nenhum usuário precisa lembrar senha; basta informar o email e digitar o código de 6 dígitos enviado automaticamente.
+- **Painel /dashboard** com cards de limite estimado, share panel com cópia/compartilhamento e lista de indicações mais recentes.
+- **Design mobile-first** com Tailwind CSS 4, efeitos de gradiente e componentes em português.
+
+### Stack
+
+- Next.js 16 (App Router, TypeScript, React Compiler)
+- Tailwind CSS 4, Geist font
+- Prisma + PostgreSQL (`lead_referral_app`)
+- React Hook Form, Zod, nanoid
+
+## Como executar localmente
+
+1. **Instale as dependências**
+
+   ```bash
+   npm install
+   ```
+
+2. **Prepare o banco e o Prisma Client**
+
+   Certifique-se de que o PostgreSQL local está rodando e acessível com o usuário `meubilhete` no database `lead_referral_app` (já criado pelo projeto). Caso precise recriar:
+
+   ```bash
+   PGPASSWORD=meubilhete createdb -h localhost -p 5432 -U meubilhete lead_referral_app
+   ```
+
+   ```bash
+   npx prisma migrate deploy
+   # para atualizar o client, rode:
+   # npx prisma generate
+   ```
+
+   O schema e as migrations ficam em `prisma/`. Tudo já está pronto para PostgreSQL, então nenhuma etapa adicional de seed é necessária.
+
+3. **Execute o servidor de desenvolvimento**
+
+   ```bash
+   npm run dev
+   ```
+
+4. Acesse [http://localhost:3000](http://localhost:3000) para visualizar o fluxo de cadastro. Após se cadastrar você será redirecionado para `/dashboard?code=SEUCODIGO`.
+
+### Scripts úteis
+
+- `npm run dev` – desenvolvimento com HMR
+- `npm run build` – build de produção
+- `npm run start` – roda o build
+- `npm run lint` – validação com ESLint
+
+### Variáveis de ambiente
+
+Configure o arquivo `.env` com a URL do banco PostgreSQL local (já incluída neste repositório):
+
+```
+DATABASE_URL="postgresql://meubilhete:meubilhete@localhost:5432/lead_referral_app"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Além do banco, configure as variáveis SMTP para o envio real de emails (exemplo com Mailtrap):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+SMTP_HOST="sandbox.smtp.mailtrap.io"
+SMTP_PORT="587"
+SMTP_USER="seu_usuario"
+SMTP_PASS="sua_senha"
+EMAIL_FROM="Lead+ Créditos <no-reply@leadplus.app>"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Estrutura
 
-## Learn More
+- `src/app/page.tsx` – landing + formulário de cadastro
+- `src/app/acesso/page.tsx` – fluxo de “já tenho cadastro” para solicitar/validar o código
+- `src/app/dashboard/page.tsx` – painel e lista de indicações (liberado após validar o email)
+- `src/app/api/register` – endpoint de cadastro/indicação
+- `src/app/api/auth/request-code` & `verify-code` – solicitam e validam o código enviado por email
+- `src/lib` – Prisma client, validadores e formatadores
+- `src/components` – formulário, painel de compartilhamento e lista de indicações
 
-To learn more about Next.js, take a look at the following resources:
+### Login e verificação por email
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. No cadastro, o usuário informa email + dados financeiros. Nenhum link é liberado até ele digitar o código enviado automaticamente.
+2. Quem já tem cadastro acessa `/acesso`, informa o email e recebe um novo código de 6 dígitos para validar.
+3. Após confirmar o código, um cookie seguro (`userCode`) é definido e o dashboard é liberado. Sem código válido, o painel permanece travado.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Próximos passos sugeridos
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Conectar autenticação real caso seja necessário proteger o dashboard.
+- Publicar em Vercel e configurar variáveis com `DATABASE_URL` apropriada.
