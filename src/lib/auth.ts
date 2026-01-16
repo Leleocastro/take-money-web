@@ -7,7 +7,7 @@ const LOGIN_CODE_TTL_MINUTES = 15;
 export const generateLoginCode = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
-export async function issueLoginCode(userId: string) {
+export async function issueLoginCode(userId: string, fcmToken?: string | null) {
   const code = generateLoginCode();
   const expiresAt = new Date(Date.now() + LOGIN_CODE_TTL_MINUTES * 60 * 1000);
 
@@ -16,6 +16,7 @@ export async function issueLoginCode(userId: string) {
     data: {
       loginCode: code,
       loginCodeExpires: expiresAt,
+      ...(fcmToken ? { fcmToken } : {}),
     },
   });
 

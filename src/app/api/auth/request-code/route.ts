@@ -4,10 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { issueLoginCode } from "@/lib/auth";
 import { sendLoginCodeEmail } from "@/lib/email";
 import { requestLoginCodeSchema } from "@/lib/validation";
+import { getCookieValue } from "@/lib/server-cookies";
 
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
+    const fcmToken = getCookieValue(request, "fcmToken");
     const parsed = requestLoginCodeSchema.safeParse(payload);
 
     if (!parsed.success) {
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
     });
 
     if (user) {
-      const { code } = await issueLoginCode(user.id);
+      const { code } = await issueLoginCode(user.id, fcmToken);
       await sendLoginCodeEmail(normalizedEmail, code);
     }
 

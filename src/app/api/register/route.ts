@@ -5,6 +5,7 @@ import { generateReferralCode } from "@/lib/referral";
 import { issueLoginCode } from "@/lib/auth";
 import { sendLoginCodeEmail } from "@/lib/email";
 import { registerLeadSchema } from "@/lib/validation";
+import { getCookieValue } from "@/lib/server-cookies";
 
 const sanitizePhone = (value: string) => value.replace(/[^0-9]/g, "");
 
@@ -26,6 +27,7 @@ const createUniqueReferralCode = async () => {
 
 export async function POST(request: Request) {
   try {
+    const fcmToken = getCookieValue(request, "fcmToken");
     const payload = await request.json();
     const parsed = registerLeadSchema.safeParse({
       ...payload,
@@ -52,7 +54,7 @@ export async function POST(request: Request) {
       where: { email: normalizedEmail },
     });
     if (existingByEmail) {
-      const { code } = await issueLoginCode(existingByEmail.id);
+      const { code } = await issueLoginCode(existingByEmail.id, fcmToken);
       await sendLoginCodeEmail(normalizedEmail, code);
 
       return NextResponse.json({
@@ -93,13 +95,14 @@ export async function POST(request: Request) {
         salary,
         loanNeed,
         referralCode,
+        ...(fcmToken ? { fcmToken } : {}),
         ...(referralOwner
           ? { referredBy: { connect: { id: referralOwner.id } } }
           : {}),
       },
     });
 
-    const { code } = await issueLoginCode(createdUser.id);
+    const { code } = await issueLoginCode(createdUser.id, fcmToken);
     await sendLoginCodeEmail(normalizedEmail, code);
 
     return NextResponse.json(

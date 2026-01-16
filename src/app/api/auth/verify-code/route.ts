@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setUserCodeCookie } from "@/lib/auth";
 import { verifyLoginCodeSchema } from "@/lib/validation";
+import { getCookieValue } from "@/lib/server-cookies";
 
 export async function POST(request: Request) {
   try {
     const isProduction = process.env.NODE_ENV === "production";
+    const fcmToken = getCookieValue(request, "fcmToken");
     const payload = await request.json();
     const parsed = verifyLoginCodeSchema.safeParse(payload);
 
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
         loginCode: null,
         loginCodeExpires: null,
         emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+        ...(fcmToken ? { fcmToken } : {}),
       },
     });
 
