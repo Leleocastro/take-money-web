@@ -39,7 +39,7 @@ export default async function DashboardPage() {
   const origin =
     headerList.get("origin") ??
     process.env.NEXT_PUBLIC_APP_URL ??
-    "http://localhost:3000";
+    "https://take-money-web.vercel.app";
   const shareUrl = `${origin}/?ref=${user.referralCode}`;
   const projectedLimit = user.salary + user.referrals.length * 800;
 
