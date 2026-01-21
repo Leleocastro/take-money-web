@@ -18,7 +18,7 @@ export async function POST(request: Request) {
           message: "Código inválido.",
           issues: parsed.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -30,14 +30,24 @@ export async function POST(request: Request) {
     if (!user || !user.loginCode || user.loginCode !== code) {
       return NextResponse.json(
         { message: "Código incorreto. Gere um novo e tente novamente." },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        {
+          message:
+            "Esta conta foi desativada e não pode mais acessar o painel. Entre em contato com o suporte.",
+        },
+        { status: 403 },
       );
     }
 
     if (user.loginCodeExpires && user.loginCodeExpires < new Date()) {
       return NextResponse.json(
         { message: "Esse código expirou. Solicite um novo para continuar." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -64,7 +74,7 @@ export async function POST(request: Request) {
       {
         message: "Não foi possível confirmar o código agora. Tente novamente.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

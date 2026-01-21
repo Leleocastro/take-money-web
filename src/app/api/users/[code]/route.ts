@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ code: string }> }
+  context: { params: Promise<{ code: string }> },
 ) {
   try {
     const { code: rawCode } = await context.params;
@@ -20,10 +20,10 @@ export async function GET(
       },
     });
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return NextResponse.json(
         { message: "Código não encontrado." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function GET(
     console.error(error);
     return NextResponse.json(
       { message: "Erro ao buscar o usuário." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

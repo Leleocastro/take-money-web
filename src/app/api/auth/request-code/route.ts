@@ -18,7 +18,7 @@ export async function POST(request: Request) {
           message: "Informe um email válido para receber o código.",
           issues: parsed.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,6 +26,16 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
+
+    if (user && !user.isActive) {
+      return NextResponse.json(
+        {
+          message:
+            "Esta conta foi desativada. Fale com o suporte para solicitar uma nova análise.",
+        },
+        { status: 403 },
+      );
+    }
 
     if (user) {
       const { code } = await issueLoginCode(user.id, fcmToken);
@@ -44,7 +54,7 @@ export async function POST(request: Request) {
         message:
           "Não conseguimos enviar o código agora. Tente de novo em instantes.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

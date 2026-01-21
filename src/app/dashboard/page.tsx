@@ -4,12 +4,13 @@ import { headers, cookies } from "next/headers";
 import { ReferralsList } from "@/components/referrals-list";
 import { SharePanel } from "@/components/share-panel";
 import { LogoutButton } from "@/components/logout-button";
+import { AccountMenu } from "@/components/account-menu";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
 import { loanNeedOptions } from "@/lib/validation";
 
 const loanNeedLabel = Object.fromEntries(
-  loanNeedOptions.map((item) => [item.value, item.label])
+  loanNeedOptions.map((item) => [item.value, item.label]),
 );
 
 export default async function DashboardPage() {
@@ -33,6 +34,10 @@ export default async function DashboardPage() {
 
   if (!user) {
     return <MissingCode code={referralCode} />;
+  }
+
+  if (!user.isActive) {
+    return <AccountInactive code={user.referralCode} />;
   }
 
   const headerList = await headers();
@@ -61,7 +66,10 @@ export default async function DashboardPage() {
                 </span>
               </div>
             </div>
-            <LogoutButton />
+            <div className="flex flex-wrap items-center gap-3">
+              <AccountMenu />
+              <LogoutButton />
+            </div>
           </div>
           <p className="text-sm text-slate-500">
             Compartilhe o link, acompanhe as indicações e veja seu limite
@@ -170,6 +178,30 @@ function MissingCode({ code }: { code: string }) {
         href="/"
         className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white"
       >
+        Fazer um novo cadastro
+      </Link>
+    </div>
+  );
+}
+
+function AccountInactive({ code }: { code: string }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
+      <h1 className="text-2xl font-semibold text-slate-900">
+        Conta desativada
+      </h1>
+      <p className="max-w-md text-sm text-slate-500">
+        A conta vinculada ao código {code} foi desativada. Seus dados foram
+        mantidos apenas para fins legais e de auditoria. Caso precise reativar,
+        fale com o nosso suporte.
+      </p>
+      <Link
+        href="/suporte"
+        className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white"
+      >
+        Ir para o suporte
+      </Link>
+      <Link href="/" className="text-sm font-semibold text-blue-600">
         Fazer um novo cadastro
       </Link>
     </div>

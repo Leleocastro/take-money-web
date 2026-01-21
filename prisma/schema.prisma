@@ -24,4 +24,6 @@ model User {
   loginCodeExpires DateTime?
   emailVerifiedAt  DateTime?
   fcmToken     String?
+  isActive     Boolean   @default(true)
+  deactivatedAt DateTime?
 }

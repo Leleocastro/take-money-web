@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           message: "Revise os dados enviados.",
           issues: parsed.error.flatten(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -54,6 +54,16 @@ export async function POST(request: Request) {
       where: { email: normalizedEmail },
     });
     if (existingByEmail) {
+      if (!existingByEmail.isActive) {
+        return NextResponse.json(
+          {
+            message:
+              "Sua conta foi desativada. Entre em contato com o suporte para solicitar uma revisão.",
+          },
+          { status: 403 },
+        );
+      }
+
       const { code } = await issueLoginCode(existingByEmail.id, fcmToken);
       await sendLoginCodeEmail(normalizedEmail, code);
 
@@ -69,12 +79,21 @@ export async function POST(request: Request) {
       where: { phone: normalizedPhone },
     });
     if (existingByPhone) {
+      if (!existingByPhone.isActive) {
+        return NextResponse.json(
+          {
+            message:
+              "Já existe um cadastro desativado com esse telefone. Procure nosso suporte para recuperar o acesso.",
+          },
+          { status: 403 },
+        );
+      }
       return NextResponse.json(
         {
           message:
             "Já existe um cadastro com esse telefone. Use o email cadastrado para entrar.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -96,7 +115,7 @@ export async function POST(request: Request) {
         loanNeed,
         referralCode,
         ...(fcmToken ? { fcmToken } : {}),
-        ...(referralOwner
+        ...(referralOwner && referralOwner.isActive
           ? { referredBy: { connect: { id: referralOwner.id } } }
           : {}),
       },
@@ -112,7 +131,7 @@ export async function POST(request: Request) {
         email: normalizedEmail,
         requiresVerification: true,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error(error);
@@ -121,7 +140,7 @@ export async function POST(request: Request) {
         message:
           "Não foi possível concluir o cadastro. Tente novamente em instantes.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
